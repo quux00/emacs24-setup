@@ -1,6 +1,10 @@
 ;; ---------------------------------------------------------- ;;
-;; ------------------- General Settings --------------------- ;;
+;; ------------- Load Path && General Settings -------------- ;;
 ;; ---------------------------------------------------------- ;;
+
+(add-to-list 'load-path "~/.emacs.d/plugins")
+(add-to-list 'load-path "~/.emacs.d/elpa/key-chord-0.5.20080915")
+(add-to-list 'load-path "~/.emacs.d/elpa/js2-mode-20090814/")
 
 (transient-mark-mode)          ; region between mark and point is highlighted only when 'active'
 (global-linum-mode)            ; puts line numbers on left side of screen
@@ -71,6 +75,16 @@
   (server-start))
 
 
+;; -------------------------------------- ;;
+;; ---------- Helper Functions ---------- ;;
+;; -------------------------------------- ;;
+
+(defun delete-horizontal-space-forward() ; adapted from 'delete-horizontal-space'
+      "*Delete all spaces and tabs after point."
+      (interactive "*")
+      (delete-region (point) (progn (skip-chars-forward " \t") (point))))
+
+
 ;; ---------------------------------------------------- ;;
 ;; ---------- Kill/Delete Whole Line Section ---------- ;;
 ;; ---------------------------------------------------- ;;
@@ -117,7 +131,7 @@
 (setq js-indent-level 2)                ; works for the basic javascript mode (not js2-mode)
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list '(2 4 6 8 10 12 14 16 18 20 22 24 26 28 30))
-
+(setq electric-indent-mode)
 
 ;; ------------------------------------------------------- ;;
 ;; ------------- Make emacs use the clipboard ------------ ;;
@@ -186,71 +200,6 @@
       (comment-or-uncomment-region (line-beginning-position) (line-end-position))
     (comment-dwim arg)))
 (global-set-key "\M-;" 'comment-dwim-line)
-
-;; ------------------------------------------------------ ;;
-;; -------------- My preferred key bindings ------------- ;;
-;; ------------------------------------------------------ ;;
-(global-set-key [(meta g)]          'goto-line)
-(global-set-key [(control shift l)] 'goto-line)
-(global-set-key "\C-c\C-c" 'comment-region)
-(global-set-key "\C-c\C-u" 'uncomment-region)
-;(global-set-key "\M-;"     'comment-or-uncomment-region)
-(global-set-key "\C-c;"    'comment-indent)
-(global-set-key "\C-x\C-d" 'electric-buffer-list) ; one of my favorite things in emacs ...
-(global-set-key "\C-c\C-k" 'kill-whole-line)      ; delete whole line (including newline) from anywhere
-(global-set-key "\C-x\C-k" 'kill-region)          ; normally mapped to \C-w
-(global-set-key "\C-w"     'backward-kill-word)   ; make emacs more like bash shell
-(global-set-key "\C-z"     'undo)                 ; too ingrained from years of Windoze ...
-(global-set-key "\C-x\C-z" 'shell)
-(global-set-key [(control \;)] 'dabbrev-expand)   ; I find the M-/ binding awkward
-(global-set-key (kbd "RET") 'newline-and-indent)  ; indent previous line after
-(global-set-key (read-kbd-macro "M-s") 'query-replace)
-(global-set-key (read-kbd-macro "C-x w") 'write-words)
-(global-set-key (read-kbd-macro "C-x c") 'write-code)
-(global-set-key "\C-x\C-v" 'scroll-up)            ; to align with my Eclipse settings
-(global-set-key "\C-c o" 'occur)                   ; occur takes regex to show all occurances in file
-
-;; Use control-arrow keys for window resizing
-;; <<MP note: turned off since these don't seem to work>>
-;; (global-set-key (kbd "<C-f11>") 'enlarge-window-horizontally)
-;; (global-set-key (kbd "<C-f12>") 'shrink-window-horizontally)
-
-
-;; ----------------------------------------------------- ;;
-;; ------------- Load Files && Load-Path --------------- ;;
-;; ----------------------------------------------------- ;;
-(add-to-list 'load-path "~/.emacs.d/plugins")
-(add-to-list 'load-path "~/.emacs.d/elpa/key-chord-0.5.20080915")
-(load-file "~/.emacs.d/macros.el")   ; load my macros
-
-
-;; ----------------------------------------------------- ;;
-;; ------------- Mine goes to 11: chords! -------------- ;;
-;; ----------------------------------------------------- ;;
-(require 'key-chord)
-(key-chord-mode 1)
-
-;; General purpose chords
-(key-chord-define-global "jk"    'dabbrev-expand)
-(key-chord-define-global "90"    "()")
-(key-chord-define-global ",,"    'indent-for-comment)
-(key-chord-define-global "a\;"   "@")
-(key-chord-define-global "s\;"   "$")
-(key-chord-define-global "df"    "\C-b")
-(key-chord-define-global "cl"    "console.log();\C-b\C-b")
-(key-chord-define-global "fj"    "\C-f")      ;; ahead one space
-(key-chord-define-global "<>"    "<>\C-b")
-
-;; chords for Ruby coding
-(key-chord-define-global "hr"    " => ")      ;; hash rocket
-
-;; chords for Clojure coding
-(key-chord-define-global "d\;"   "#{}\C-b")  ;; \C-b is "backspace">?<>
-
-;; chords for JavaScript coding
-(key-chord-define-global "jl"    'jslambda)  ;; jslambda is a macro I defined
-(key-chord-define-global "fn"    'jsfunc)         
-(key-chord-define-global "jq"    "$('')\C-b\C-b") ;; for jquery
 
 ;; --------------------------------------------------------- ;;
 ;; ------------------ Color Theme Support ------------------ ;;
@@ -332,7 +281,7 @@
 ;; --------------------------------------------------------- ;;
 
 ;; Steve Yegge's JavaScript major mode: http://code.google.com/p/js2-mode
-(autoload 'js2-mode "js2" nil t)
+;; (autoload 'js2-mode "js2" nil t)
 
 ;; use the regular js-mode by default - Yegge's is too opinionated
 (add-to-list 'auto-mode-alist '("\\.js$" . js-mode))
@@ -609,15 +558,15 @@
 ;; (shell)
 
 
-;; ------------------------------------------------------ ;;
-;; ----------------- Things Yet to Try ------------------ ;;
-;; ------------------------------------------------------ ;;
-;; ===> ido:  http://www.masteringemacs.org/articles/2010/10/10/introduction-to-ido-mode/
-;; ;; enable ido mode
-;; (require 'ido)
-;; (ido-mode t)
-;; (setq ido-enable-flex-matching t)
-
+;; --------------------------------------------- ;;
+;; ----------------- Ido mode ------------------ ;;
+;; --------------------------------------------- ;;
+;; => ido:  http://www.masteringemacs.org/articles/2010/10/10/introduction-to-ido-mode/
+;; enable ido mode
+(require 'ido)
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode 1)
 
 ;; --------------------------------------------- ;;
 ;; ------------ Reminders and Notes ------------ ;;
@@ -627,6 +576,14 @@
 ;; change 'file coding system' with 'set-buffer-file-coding-system RET unix or dos
 ;; or C-x RET f unix or dos
 ;; Use C-x <left> and C-x <right> to rapidly switch between buffers
+
+
+
+;; ---------------------------------------- ;;
+;; ------------- Load Files --------------- ;;
+;; ---------------------------------------- ;;
+(load-file "~/.emacs.d/macros.el")        ; load my macros
+(load-file "~/.emacs.d/key-bindings.el")  ; load my key-bindings
 
 
 

@@ -12,6 +12,7 @@
 (fset 'yes-or-no-p 'y-or-n-p)  ; changes 'yes' 'no' prompts to 'y' and 'n'(
 (delete-selection-mode)        ; the active region can be replaced just be starting to type
 (tool-bar-mode -1)             ; turn off the toolbar
+(scroll-bar-mode -1)           ; turn off the scrollbar
 (mouse-avoidance-mode 'exile)  ; if cursor nears mouse, make the cursor move away automatically
 (global-auto-revert-mode 1)    ; auto refresh buffers
 (setq global-auto-revert-non-file-buffers t)  ; Also auto refresh dired
@@ -48,15 +49,48 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
+;; Only one window on startup
+;; (add-hook 'emacs-startup-hook
+;;           (lambda () (delete-other-windows)) t)
+
+(add-hook 'emacs-startup-hook 'delete-other-windows t)
+
+;; keep previous windows configurations
+;; after typing C-x 1 to close other windows
+;; use C-c <left> to go back to the previous window config
+(winner-mode 1)
+
+;; Toggle between split windows and a single window
+(defun toggle-windows-split()
+  "Switch back and forth between one window and whatever split of windows we might have in the frame. The idea is to maximize the current buffer, while being able to go back to the previous split of windows in the frame simply by calling this command again."
+  (interactive)
+  (if (not(window-minibuffer-p (selected-window)))
+      (progn
+        (if (< 1 (count-windows))
+            (progn
+              (window-configuration-to-register ?u)
+              (delete-other-windows))
+          (jump-to-register ?u))))
+  (my-iswitchb-close))
+
 
 ;; ------------------------------- ;;
 ;; ----- Package.el settings ----- ;;
 ;; ------------------------------- ;;
 (require 'package)
 (package-initialize)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;; (add-to-list 'package-archives
+;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+
+;; -------------------------- ;;
+;; ----- Pomodoro Timer ----- ;;
+;; -------------------------- ;;
+;; installed via MELPA
+;; instructions at: https://github.com/docgnome/pomodoro.el
+(require 'pomodoro)
 
 ;; ---------------------------------------------------------- ;;
 ;; ----- Experimental => try out and document or delete ----- ;;
@@ -131,7 +165,12 @@
 (setq js-indent-level 2)                ; works for the basic javascript mode (not js2-mode)
 (setq indent-line-function 'insert-tab)
 (setq tab-stop-list '(2 4 6 8 10 12 14 16 18 20 22 24 26 28 30))
-(setq electric-indent-mode)
+
+;; smart indenting and pairing for all
+(electric-pair-mode t)
+(electric-indent-mode t)
+;;(electric-layout-mode t)
+
 
 ;; ------------------------------------------------------- ;;
 ;; ------------- Make emacs use the clipboard ------------ ;;
@@ -212,7 +251,7 @@
 ;; (load-file "~/.emacs.d/plugins/color-themes/zenburn-theme.el")
 ;; (require 'color-theme-zenburn)
 ;; (color-theme-zenburn)
-  
+
 ;; uncomment this if you want color-theme to autoload
 ;; (eval-after-load "color-theme"
 ;;   '(progn
@@ -244,7 +283,7 @@
   (add-to-list 'load-path "~/.emacs.d/plugins/color-themes")
   (interactive)
   (select-frame (make-frame))
-  (require 'color-theme-zenburn)  
+  (require 'color-theme-zenburn)
   (color-theme-initialize)
   (set-variable 'color-theme-is-global nil)
   ;; custom theme from: https://github.com/bbatsov/zenburn-emacs
@@ -258,7 +297,7 @@
   ;; (interactive)
   (if new-frame
       (select-frame (make-frame)))
-  (require 'color-theme-subdued)  
+  (require 'color-theme-subdued)
   (color-theme-initialize)
   (set-variable 'color-theme-is-global nil)
   ;; custom theme from: http://jblevins.org/projects/emacs-color-themes/
@@ -305,18 +344,22 @@
 ;;(autoload 'clojure-mode "clojure-mode" "A major mode for Clojure" t)
 (add-to-list 'auto-mode-alist '("\\.clj$" . clojure-mode))
 
+;; Mark .ant files as xml-mode
+(add-to-list 'auto-mode-alist '("\\.xml$" . xml-mode))
+(add-to-list 'auto-mode-alist '("\\.ant$" . xml-mode))
+
 ;; Groovy mode
 ;;; use groovy-mode when file ends in .groovy or has #!/bin/groovy at start
-(add-to-list 'load-path "~/.emacs.d/plugins/groovy")
 (autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t)
 (add-to-list 'auto-mode-alist '("\.groovy$" . groovy-mode))
+(add-to-list 'auto-mode-alist '("\.gradle$" . groovy-mode))
 (add-to-list 'interpreter-mode-alist '("groovy" . groovy-mode))
 
 ;;; make Groovy mode electric by default.
-(add-hook 'groovy-mode-hook
-          '(lambda ()
-             (require 'groovy-electric)
-             (groovy-electric-mode)))
+;; (add-hook 'groovy-mode-hook
+;;           '(lambda ()
+;;              (require 'groovy-electric)
+;;              (groovy-electric-mode)))
 
 ;; Windows batch file mode, for those sad moments when it's required ...
 ;; Get from: http://ftp.gnu.org/old-gnu/emacs/windows/contrib/bat-mode.el
@@ -375,6 +418,12 @@
 ;; mumamo (multiple major modes) support -> mostly good for html and php, so disabled by default
 ;; (load "~/.emacs.d/plugins/nxhtml/autostart.el")
 
+
+;; html mode
+(defun my-html-mode-hooks ()
+  (auto-fill-mode -1))
+
+(add-hook 'html-mode-hook 'my-html-mode-hooks)
 
 ;; --------------------------------------------------- ;;
 ;; --------------- Dirtree and Friends --------------- ;;
@@ -435,10 +484,16 @@
 ;;              nil '(("\\<\\(lambda\\)" 1 font-lock-warning-face t)))))
 
 
+;; (global-set-key "\C-c\C-o" 'ace-jump-mode)
+;; (define-key global-map "\C-c\C-o" 'ace-jump-mode)
+;; (global-set-key (kbd "C-M-m") 'mark-more-like-this) ; like the other two,
+;; (global-set-key "\C-x\C-v" 'scroll-up)            ; to align with my Eclipse settings
+;; (global-set-key [(control c) (space)] 'ace-jump-mode)
 
-;; ---------------------------------------------------------- ;;
-;; ----------------- Enable paredit mode -------------------- ;;
-;; ---------------------------------------------------------- ;;
+
+;; --------------------------------------------------- ;;
+;; ----------------- paredit mode -------------------- ;;
+;; --------------------------------------------------- ;;
 (autoload 'enable-paredit-mode "paredit"
   "Turn on pseudo-structural editing of Lisp code."
   t)
@@ -450,11 +505,11 @@
 
 ;; paredit in slime
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))
-	
-;; (eval-after-load "slime" 
-;;   '(progn (slime-setup '(slime-repl))	
-;; 	(defun paredit-mode-enable () (paredit-mode 1))	
-;; 	(add-hook 'slime-mode-hook 'paredit-mode-enable)	
+
+;; (eval-after-load "slime"
+;;   '(progn (slime-setup '(slime-repl))
+;; 	(defun paredit-mode-enable () (paredit-mode 1))
+;; 	(add-hook 'slime-mode-hook 'paredit-mode-enable)
 ;; 	(add-hook 'slime-repl-mode-hook 'paredit-mode-enable)
 ;; 	(setq slime-protocol-version 'ignore)))
 
@@ -462,7 +517,7 @@
 ;; ---------------------------------------------------------- ;;
 ;; ------------------------ SLIME --------------------------- ;;
 ;; ---------------------------------------------------------- ;;
-;; (eval-after-load "slime" 
+;; (eval-after-load "slime"
 ;;   '(progn (slime-setup '(slime-repl))))
 
 ;; (add-to-list 'load-path "~/.emacs.d/plugins/slime")
@@ -475,21 +530,29 @@
 ;; ---------------------------------------------------------- ;;
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
-(setq org-startup-folded nil )
+(setq org-startup-folded nil)
 (setq word-wrap t)
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ck" 'org-agenda)  ; note this is C-ca in the org-mode doc
 (setq org-todo-keywords
-      '((sequence "TODO" "IN-PROGRESS" "QUESTION(q)" "DONE(d)" "DEFERRED" "DATEDONE")))
+      '((sequence "TODO" "IN-PROGRESS" "QUESTION(q)" "DONE(d)" "REMINDER" "DEFERRED" "LEFTOFF" "DATEDONE")))
 (setq org-todo-keyword-faces
            '(("DONE"     . (:foreground "#94ff94"))
              ("QUESTION" . (:foreground "#ff65ff"))
+             ("REMINDER" . (:foreground "#c8c1f1"))
              ("DEFERRED" . (:foreground "#ffc358"))
+             ("LEFTOFF"  . (:foreground "#f333d8"))
              ))
 (setq org-log-done t)
 (org-remember-insinuate)  ; use remember.el in org-mode
 (setq org-default-notes-file (concat org-directory "/remember.org"))
 (define-key global-map "\C-cr" 'org-remember)  ; note this is C-cc in the org-mode doc
+
+(defun no-electric-indent-mode-hook ()
+  (electric-indent-mode -1))
+
+(add-hook 'org-mode-hook 'no-electric-indent-mode-hook)
+
 
 ;; ---------------------------------------------------------- ;;
 ;; --------------- Printing and PDF support ----------------- ;;
@@ -578,13 +641,17 @@
 ;; Use C-x <left> and C-x <right> to rapidly switch between buffers
 
 
+;; --------------------------------------------------- ;;
+;; ----------------- ace-jump-mode ------------------- ;;
+;; --------------------------------------------------- ;;
+(require 'ace-jump-mode)
+
 
 ;; ---------------------------------------- ;;
 ;; ------------- Load Files --------------- ;;
 ;; ---------------------------------------- ;;
 (load-file "~/.emacs.d/macros.el")        ; load my macros
 (load-file "~/.emacs.d/key-bindings.el")  ; load my key-bindings
-
 
 
 ;; ---------------------------------------------------- ;;
@@ -596,21 +663,44 @@
 
 ;;------ Automatic settings: Do Not Edit These ------- ;;
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(auto-save-default nil)
+ '(backup-inhibited t t)
  '(column-number-mode t)
+ '(custom-safe-themes (quote ("71efabb175ea1cf5c9768f10dad62bb2606f41d110152f4ace675325d28df8bd" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" default)))
+ '(echo-keystrokes 0.01)
+ '(fill-column 78)
+ '(frame-title-format (quote ("%f - " user-real-login-name "@" system-name)) t)
+ '(ido-auto-merge-work-directories-length nil)
+ '(ido-create-new-buffer (quote always))
+ '(ido-enable-flex-matching t)
+ '(ido-enable-prefix nil)
+ '(ido-everywhere t)
+ '(ido-ignore-extensions t)
+ '(ido-max-prospects 8)
+ '(ido-use-filename-at-point (quote guess))
+ '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
+ '(linum-format " %d ")
+ '(package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("marmalade" . "http://marmalade-repo.org/packages/"))))
+ '(puppet-indent-level tab-width)
+ '(recentf-max-saved-items 75)
+ '(require-final-newline t)
+ '(ruby-indent-level tab-width)
+ '(show-paren-delay 0)
  '(show-paren-mode t)
  '(tab-stop-list (quote (2 4 6 8 10 12 14 16 18 20 22 24 26 28 30)))
+ '(tab-width 4)
  '(tool-bar-mode nil))
 
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(default ((t (:inherit nil :stipple nil :background "black" :foreground "yellow" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight bold :height 98 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
  '(font-lock-warning-face ((((class color) (background dark)) (:foreground "SkyBlue" :background "black")))))
 

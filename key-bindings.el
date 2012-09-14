@@ -21,6 +21,12 @@
 (global-set-key "\C-x\C-v" 'scroll-up)            ; to align with my Eclipse settings
 (global-set-key "\C-c o" 'occur)                  ; occur takes regex to show all occurances in file
 
+;; keybindings for moving the cursor between windows/frames
+(global-set-key (kbd "C-S-<up>") 'windmove-up)
+(global-set-key (kbd "C-S-<down>") 'windmove-down)
+(global-set-key (kbd "C-S-<right>") 'windmove-right)
+(global-set-key (kbd "C-S-<left>") 'windmove-left)
+
 (require 'expand-region)  ; https://github.com/magnars/expand-region.el
 (global-set-key (kbd "C-=") 'er/expand-region)
 
@@ -33,6 +39,21 @@
                                                     ; but takes an argument (negative is previous)
 (global-set-key [(control meta \;)]
                 'delete-horizontal-space-forward)   ; pers function
+
+
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+(define-key global-map (kbd "C-c C-v") 'wrap-region-mode)
+
+;; override the default keybindings in paredit
+(eval-after-load 'paredit
+  '(progn
+     (define-key paredit-mode-map (kbd "<M-right>") 'paredit-forward-slurp-sexp)
+     (define-key paredit-mode-map (kbd "<M-left>")  'paredit-forward-barf-sexp)
+     (define-key paredit-mode-map (kbd "<C-right>") nil)
+     (define-key paredit-mode-map (kbd "<C-left>")  nil)))
+
+(define-key global-map (kbd "C-|") 'toggle-windows-split)
 
 
 ;; Use control-arrow keys for window resizing
@@ -50,23 +71,23 @@
 ;; General purpose chords
 (key-chord-define-global "jk"    'dabbrev-expand)
 (key-chord-define-global "90"    "()")
-(key-chord-define-global ".,"    "()\C-b")
+(key-chord-define-global ".,"    "()\C-b")   ;; probably don't need with electric-pair-mode now?
 (key-chord-define-global ",,"    'indent-for-comment)
 (key-chord-define-global "a\;"   "@")
-(key-chord-define-global "s\;"   "$")
+;;(key-chord-define-global "s\;"   "$")
 (key-chord-define-global "df"    "\C-b")
 (key-chord-define-global "c\;"   "console.log();\C-b\C-b")
-(key-chord-define-global "fj"    "\C-f")      ;; ahead one space
+(key-chord-define-global "fj"    "\C-f")     ;; ahead one space
 (key-chord-define-global "<>"    "<>\C-b")
 
 ;; chords for Ruby coding
-(key-chord-define-global "hr"    " => ")      ;; hash rocket
+(key-chord-define-global "hh"    " => ")     ;; hash rocket
 
-;; chords for Clojure coding
+;; chords for Clojure/Ruby coding
 (key-chord-define-global "d\;"   "#{}\C-b")  ;; \C-b is "backspace">?<>
 
 ;; chords for JavaScript coding
 (key-chord-define-global "jl"    'jslambda)  ;; jslambda is a macro I defined
 (key-chord-define-global "f\;"   'jsfunc)         
-(key-chord-define-global "jq"    "$('')\C-b\C-b") ;; for jquery
+(key-chord-define-global "jq"    "$()\C-b")  ;; for jquery
 

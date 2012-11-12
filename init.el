@@ -119,6 +119,17 @@
       (delete-region (point) (progn (skip-chars-forward " \t") (point))))
 
 
+;; edot - Edit the .emacs file
+(defun edot ()
+  (interactive)
+  (find-file "~/.emacs.d/init.el"))
+
+;; ldot - Load the .emacs file (to apply changes)
+(defun ldot ()
+  (interactive)
+  (load-file "~/.emacs.d/init.el"))
+
+
 ;; ---------------------------------------------------- ;;
 ;; ---------- Kill/Delete Whole Line Section ---------- ;;
 ;; ---------------------------------------------------- ;;
@@ -366,6 +377,24 @@
 (require 'bat-mode)
 (add-to-list 'auto-mode-alist '("\\.bat$" . bat-mode))
 
+;; web-mode.el for mixed-mode HTML plus scripting lang and css
+;; http://web-mode.org/
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.jsp\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+    
+(defun web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-html-offset 2)
+  (setq web-mode-css-offset 2)
+  (setq web-mode-script-offset 2)
+)
+(add-hook 'web-mode-hook 'web-mode-hook)
+
+    
 ;; Haml mode
 (require 'haml-mode)
 (add-hook 'haml-mode-hook
@@ -524,10 +553,16 @@
 ;; (require 'slime)
 ;; (slime-setup)
 
+;; ---------------------------------------------------- ;;
+;; ------------------ ERC settings -------------------- ;;
+;; ---------------------------------------------------- ;;
 
-;; ---------------------------------------------------------- ;;
-;; ------------------ org-mode settings --------------------- ;;
-;; ---------------------------------------------------------- ;;
+(setq erc-hide-list '("JOIN" "PART" "QUIT"))
+
+
+;; ---------------------------------------------------- ;;
+;; --------------- org-mode settings ------------------ ;;
+;; ---------------------------------------------------- ;;
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
 (setq org-startup-folded nil)

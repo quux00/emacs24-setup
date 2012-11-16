@@ -79,11 +79,11 @@
 ;; ------------------------------- ;;
 (require 'package)
 (package-initialize)
-;; (add-to-list 'package-archives
-;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
-
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+
+;; (add-to-list 'package-archives
+;;              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
 ;; -------------------------- ;;
 ;; ----- Pomodoro Timer ----- ;;
@@ -531,6 +531,9 @@
 (add-hook 'clojure-mode-hook    'enable-paredit-mode)
 (add-hook 'lisp-mode-hook       'enable-paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
+
+(add-hook 'clojure-mode-hook    'hs-minor-mode)
+
 
 ;; paredit in slime
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))

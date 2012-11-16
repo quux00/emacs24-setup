@@ -19,7 +19,13 @@
 (global-set-key (read-kbd-macro "C-x w") 'write-words)
 (global-set-key (read-kbd-macro "C-x c") 'write-code)
 (global-set-key "\C-x\C-v" 'scroll-up)            ; to align with my Eclipse settings
-(global-set-key "\C-c o" 'occur)                  ; occur takes regex to show all occurances in file
+(global-set-key "\C-co" 'occur)                  ; occur takes regex to show all occurances in file
+
+;; hs-minor-mode keybindings
+(global-set-key "\C-cc" 'hs-toggle-hiding)
+(global-set-key "\C-ce" 'hs-show-all)
+(global-set-key "\C-cC" 'hs-hide-all)
+
 
 ;; keybindings for moving the cursor between windows/frames
 (global-set-key (kbd "C-S-<up>") 'windmove-up)

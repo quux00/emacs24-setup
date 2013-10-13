@@ -5,6 +5,8 @@
 (add-to-list 'load-path "~/.emacs.d/plugins")
 (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-0.5.20080915")
 (add-to-list 'load-path "~/.emacs.d/elpa/js2-mode-20090814/")
+(add-to-list 'load-path "~/.emacs.d/elpa/solarized-theme-0.5.0/")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
 (transient-mark-mode)          ; region between mark and point is highlighted only when 'active'
 (global-linum-mode)            ; puts line numbers on left side of screen
@@ -14,7 +16,7 @@
 (tool-bar-mode -1)             ; turn off the toolbar
 (scroll-bar-mode -1)           ; turn off the scrollbar
 (mouse-avoidance-mode 'exile)  ; if cursor nears mouse, make the cursor move away automatically
-(global-auto-revert-mode 1)    ; auto refresh buffers
+(global-auto-revert-mode 1)    ; auto refresh bufferss
 (setq global-auto-revert-non-file-buffers t)  ; Also auto refresh dired
 
 ;; remove if this becomes a problem
@@ -78,19 +80,56 @@
 ;; ----- Package.el settings ----- ;;
 ;; ------------------------------- ;;
 (require 'package)
-(package-initialize)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
-
 ;; (add-to-list 'package-archives
-;;              '("melpa" . "http://melpa.milkbox.net/packages/") t)
+;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
 
-;; -------------------------- ;;
-;; ----- Pomodoro Timer ----- ;;
-;; -------------------------- ;;
-;; installed via MELPA
-;; instructions at: https://github.com/docgnome/pomodoro.el
-(require 'pomodoro)
+(package-initialize)
+
+;; auto-install packages if there are not already installed
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+(defvar my-packages '(clojure-mode
+                      nrepl
+                      expand-region
+                      ;; magit
+                      markdown-mode
+                      yasnippet
+                      paredit
+                      web-mode
+                      color-theme
+                      ace-jump-mode
+                      groovy-mode
+                      highlight-parentheses
+                      mark-multiple
+                      pomodoro
+                      scala-mode
+                      yaml-mode
+                      ))
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
+
+;; -------------------------------------- ;;
+;; ----- ac-nrepl and auto-complete ----- ;;
+;; -------------------------------------- ;;
+(require 'auto-complete-config)
+(ac-config-default)
+
+(require 'ac-nrepl)
+(add-hook 'nrepl-mode-hook 'ac-nrepl-setup)
+(add-hook 'nrepl-interaction-mode-hook 'ac-nrepl-setup)
+(eval-after-load "auto-complete"
+  '(add-to-list 'ac-modes 'nrepl-mode))
+
+(defun set-auto-complete-as-completion-at-point-function ()
+  (setq completion-at-point-functions '(auto-complete)))
+(add-hook 'auto-complete-mode-hook 'set-auto-complete-as-completion-at-point-function)
+
+(add-hook 'nrepl-mode-hook 'set-auto-complete-as-completion-at-point-function)
+(add-hook 'nrepl-interaction-mode-hook 'set-auto-complete-as-completion-at-point-function)
 
 ;; ---------------------------------------------------------- ;;
 ;; ----- Experimental => try out and document or delete ----- ;;
@@ -355,9 +394,17 @@
 ;;(autoload 'clojure-mode "clojure-mode" "A major mode for Clojure" t)
 (add-to-list 'auto-mode-alist '("\\.clj$" . clojure-mode))
 
+;; the "hide-seek" minor mode
+;; 
+(add-hook 'clojure-mode-hook    'hs-minor-mode)
+
+
 ;; Mark .ant files as xml-mode
 (add-to-list 'auto-mode-alist '("\\.xml$" . xml-mode))
 (add-to-list 'auto-mode-alist '("\\.ant$" . xml-mode))
+
+;; JSON reformat support
+(load-file "~/.emacs.d/plugins/json-reformat.el")
 
 ;; Groovy mode
 ;;; use groovy-mode when file ends in .groovy or has #!/bin/groovy at start
@@ -371,6 +418,12 @@
 ;;           '(lambda ()
 ;;              (require 'groovy-electric)
 ;;              (groovy-electric-mode)))
+
+;; Improved go-mode over the default one
+;; Not available in emacs repos at time of installation
+;; Get from: https://github.com/dominikh/go-mode.el
+(require 'go-mode)
+(add-to-list 'auto-mode-alist '("\\.go$" . go-mode))
 
 ;; Windows batch file mode, for those sad moments when it's required ...
 ;; Get from: http://ftp.gnu.org/old-gnu/emacs/windows/contrib/bat-mode.el
@@ -416,6 +469,11 @@
 (add-to-list 'auto-mode-alist '("\\.coffee$" . coffee-mode))
 (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
 
+;; Pig mode
+(add-to-list 'load-path "~/.emacs.d/plugins/pig-mode")
+(require 'pig-mode)
+(add-to-list 'auto-mode-alist '("\\.pig$" . pig-mode))
+
 ;; Markdown mode
 (autoload 'markdown-mode "markdown-mode.el"
   "Major mode for editing Markdown files" t)
@@ -439,10 +497,16 @@
 
 ;; cucumber mode and support
 ;; git clone git://github.com/michaelklishin/cucumber.el.git
-(add-to-list 'load-path "~/.emacs.d/plugins/cucumber.el")
-(require 'feature-mode)
-(require 'cucumber-mode)
-(add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+;; (add-to-list 'load-path "~/.emacs.d/plugins/cucumber.el")
+;; (require 'feature-mode)
+;; (require 'cucumber-mode)
+;; (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
+
+;; flex mode: http://jflex.de
+(add-to-list 'load-path "~/.emacs.d/plugins/jflex-mode.el")
+(require 'jflex-mode)
+(add-to-list 'auto-mode-alist '("\\.flex$" . jflex-mode))
+
 
 ;; mumamo (multiple major modes) support -> mostly good for html and php, so disabled by default
 ;; (load "~/.emacs.d/plugins/nxhtml/autostart.el")
@@ -492,6 +556,11 @@
             (font-lock-add-keywords
              nil '(("\\<\\(FIXME:\\|TODO:\\|DEBUG:\\)" 1 font-lock-warning-face t)))))
 
+(add-hook 'python-mode-hook
+          (lambda ()
+            (font-lock-add-keywords
+             nil '(("\\<\\(FIXME:\\|TODO:\\|DEBUG:\\)" 1 font-lock-warning-face t)))))
+
 (add-hook 'scala-mode-hook
           (lambda ()
             (font-lock-add-keywords
@@ -503,6 +572,11 @@
              nil '(("\\<\\(FIXME:\\|TODO:\\|DEBUG:\\)" 1 font-lock-warning-face t)))))
 
 (add-hook 'js-mode-hook
+          (lambda ()
+            (font-lock-add-keywords
+             nil '(("\\<\\(\\$\\.\\|FIXME:\\|TODO:\\|DEBUG:\\)" 1 font-lock-warning-face t)))))
+
+(add-hook 'go-mode-hook
           (lambda ()
             (font-lock-add-keywords
              nil '(("\\<\\(\\$\\.\\|FIXME:\\|TODO:\\|DEBUG:\\)" 1 font-lock-warning-face t)))))
@@ -532,29 +606,73 @@
 (add-hook 'lisp-mode-hook       'enable-paredit-mode)
 (add-hook 'emacs-lisp-mode-hook 'enable-paredit-mode)
 
-(add-hook 'clojure-mode-hook    'hs-minor-mode)
-
-
 ;; paredit in slime
 (add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))
 
-;; (eval-after-load "slime"
-;;   '(progn (slime-setup '(slime-repl))
-;; 	(defun paredit-mode-enable () (paredit-mode 1))
-;; 	(add-hook 'slime-mode-hook 'paredit-mode-enable)
-;; 	(add-hook 'slime-repl-mode-hook 'paredit-mode-enable)
-;; 	(setq slime-protocol-version 'ignore)))
 
+;; ---------------------------------------------------- ;;
+;; -------------- CopyWithoutSelection ---------------- ;;
+;; ---------------------------------------------------- ;;
+;; from http://emacswiki.org/emacs/CopyWithoutSelection ;;
+(defun get-point (symbol &optional arg)
+  "get the point"
+  (funcall symbol arg)
+  (point))
 
-;; ---------------------------------------------------------- ;;
-;; ------------------------ SLIME --------------------------- ;;
-;; ---------------------------------------------------------- ;;
-;; (eval-after-load "slime"
-;;   '(progn (slime-setup '(slime-repl))))
+(defun copy-thing (begin-of-thing end-of-thing &optional arg)
+  "copy thing between beg & end into kill ring"
+  (save-excursion
+    (let ((beg (get-point begin-of-thing 1))
+          (end (get-point end-of-thing arg)))
+      (copy-region-as-kill beg end))))
 
-;; (add-to-list 'load-path "~/.emacs.d/plugins/slime")
-;; (require 'slime)
-;; (slime-setup)
+(defun paste-to-mark(&optional arg)
+  "Paste things to mark, or to the prompt in shell-mode"
+  (let ((pasteMe 
+       	 (lambda()
+       	   (if (string= "shell-mode" major-mode)
+               (progn (comint-next-prompt 25535) (yank))
+             (progn (goto-char (mark)) (yank) )))))
+    (if arg
+        (if (= arg 1)
+       		nil
+          (funcall pasteMe))
+      (funcall pasteMe))))
+
+(defun copy-word (&optional arg)
+  "Copy words at point into kill-ring" 
+  (interactive "P")
+  (copy-thing 'backward-word 'forward-word arg)
+  ;;(paste-to-mark arg)
+  )
+
+(defun copy-line (&optional arg)
+  "Save current line into Kill-Ring without mark the line "
+  (interactive "P")
+  (copy-thing 'beginning-of-line 'end-of-line arg)
+  (paste-to-mark arg))
+
+(defun copy-paragraph (&optional arg)
+  "Copy paragraphes at point"
+  (interactive "P")
+  (copy-thing 'backward-paragraph 'forward-paragraph arg)
+  (paste-to-mark arg))
+
+(defun beginning-of-string(&optional arg)
+  (re-search-backward "[ \t]" (line-beginning-position) 3 1)
+  (if (looking-at "[\t ]")  (goto-char (+ (point) 1)) ))
+
+(defun end-of-string(&optional arg)
+  (re-search-forward "[ \t]" (line-end-position) 3 arg)
+  (if (looking-back "[\t ]") (goto-char (- (point) 1)) ))
+
+(defun thing-copy-string-to-mark(&optional arg)
+  "Try to copy a string and paste it to the mark
+  When used in shell-mode, it will paste string on shell prompt by default "
+  (interactive "P")
+  (copy-thing 'beginning-of-string 'end-of-string arg)
+  (paste-to-mark arg))
+
 
 ;; ---------------------------------------------------- ;;
 ;; ------------------ ERC settings -------------------- ;;
@@ -573,11 +691,12 @@
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ck" 'org-agenda)  ; note this is C-ca in the org-mode doc
 (setq org-todo-keywords
-      '((sequence "TODO" "IN-PROGRESS" "QUESTION(q)" "DONE(d)" "REMINDER" "DEFERRED" "LEFTOFF" "DATEDONE")))
+      '((sequence "TODO" "IN-PROGRESS" "QUESTION(q)" "DONE(d)" "REMINDER" "DEFERRED" "IDEA" "LEFTOFF" "DATEDONE")))
 (setq org-todo-keyword-faces
            '(("DONE"     . (:foreground "#94ff94"))
              ("QUESTION" . (:foreground "#ff65ff"))
              ("REMINDER" . (:foreground "#c8c1f1"))
+             ("IDEA"     . (:foreground "#70ff00"))
              ("DEFERRED" . (:foreground "#ffc358"))
              ("LEFTOFF"  . (:foreground "#f333d8"))
              ))
@@ -643,6 +762,19 @@
       (kill-buffer unix-buffer))))
 
 
+;; --------------------------------------------------- ;;
+;; ------------- Useful misc. functions -------------- ;;
+;; --------------------------------------------------- ;;
+(defun increment-number-at-point ()
+  (interactive)
+  (skip-chars-backward "0123456789")
+  (or (looking-at "[0123456789]+")
+      (error "No number at point"))
+  (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
+
+(global-set-key (kbd "C-c +") 'increment-number-at-point)
+
+
 ;; ----------------------------------------------------- ;;
 ;; ---------------- Shell support / use ---------------- ;;
 ;; ----------------------------------------------------- ;;
@@ -690,6 +822,7 @@
 ;; ---------------------------------------- ;;
 (load-file "~/.emacs.d/macros.el")        ; load my macros
 (load-file "~/.emacs.d/key-bindings.el")  ; load my key-bindings
+(load-file "~/.emacs.d/keyword-string.el")  ; load keyword-string toggle fns
 
 
 ;; ---------------------------------------------------- ;;
@@ -708,7 +841,7 @@
  '(auto-save-default nil)
  '(backup-inhibited t t)
  '(column-number-mode t)
- '(custom-safe-themes (quote ("71efabb175ea1cf5c9768f10dad62bb2606f41d110152f4ace675325d28df8bd" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" default)))
+ '(custom-safe-themes (quote ("1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "501caa208affa1145ccbb4b74b6cd66c3091e41c5bb66c677feda9def5eab19c" "d2622a2a2966905a5237b54f35996ca6fda2f79a9253d44793cfe31079e3c92b" "72cc9ae08503b8e977801c6d6ec17043b55313cda34bcf0e6921f2f04cf2da56" "951e10f17de57de1e0c9cbeb44fcdda1b6c6d26beab40c3bd0abbfc38dd5c9c8" "5e1d1564b6a2435a2054aa345e81c89539a72c4cad8536cfe02583e0b7d5e2fa" "bf7ed640479049f1d74319ed004a9821072c1d9331bc1147e01d22748c18ebdf" "71efabb175ea1cf5c9768f10dad62bb2606f41d110152f4ace675325d28df8bd" "71b172ea4aad108801421cc5251edb6c792f3adbaecfa1c52e94e3d99634dee7" default)))
  '(echo-keystrokes 0.01)
  '(fill-column 78)
  '(frame-title-format (quote ("%f - " user-real-login-name "@" system-name)) t)

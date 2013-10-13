@@ -5,3 +5,6 @@ auto-save-list
 .places
 url/cookies
 eshell
+session.*
+*.dat
+bookmarks

@@ -57,26 +57,13 @@
      (define-key paredit-mode-map (kbd "<M-right>") 'paredit-forward-slurp-sexp)
      (define-key paredit-mode-map (kbd "<M-left>")  'paredit-forward-barf-sexp)
      (define-key paredit-mode-map (kbd "<C-right>") nil)
-     (define-key paredit-mode-map (kbd "<C-left>")  nil)))
+     (define-key paredit-mode-map (kbd "<C-left>")  nil)
+     ;; puts parens around the sexp (word) you are current only or
+     ;; around mark and point
+     (define-key paredit-mode-map (kbd "M-)")  'paredit-wrap-round)))
 
 (define-key global-map (kbd "C-|") 'toggle-windows-split)
 
-
-;; Use control-arrow keys for window resizing
-;; <<MP note: turned off since these don't seem to work>>
-;; (global-set-key (kbd "<C-f11>") 'enlarge-window-horizontally)
-;; (global-set-key (kbd "<C-f12>") 'shrink-window-horizontally)
-
-
-;; ----------------------------------------------------- ;;
-;; ------------- Mine goes to 11: chords! -------------- ;;
-;; ----------------------------------------------------- ;;
-(require 'key-chord)
-(key-chord-mode 1)
-
-;; General purpose chords
-(key-chord-define-global "jk"    'dabbrev-expand)
-(key-chord-define-global "90"    "()")
 (key-chord-define-global ".,"    "()\C-b")   ;; probably don't need with electric-pair-mode now?
 (key-chord-define-global ",,"    'indent-for-comment)
 (key-chord-define-global "a\;"   "@")
@@ -93,7 +80,18 @@
 (key-chord-define-global "d\;"   "#{}\C-b")  ;; \C-b is "backspace">?<>
 
 ;; chords for JavaScript coding
-(key-chord-define-global "jl"    'jslambda)  ;; jslambda is a macro I defined
+;; (key-chord-define-global "jl"    'jslambda)  ;; jslambda is a macro I def
 (key-chord-define-global "f\;"   'jsfunc)         
 (key-chord-define-global "jq"    "$()\C-b")  ;; for jquery
 
+
+
+;; ---------------------------------------------------- ;;
+;; -------------- CopyWithoutSelection ---------------- ;;
+;; ---------------------------------------------------- ;;
+;; from http://emacswiki.org/emacs/CopyWithoutSelection ;;
+;; fns defined in init.el
+(global-set-key (kbd "C-c w") (quote copy-word))
+(global-set-key (kbd "C-c l") (quote copy-line))
+(global-set-key (kbd "C-c p") (quote copy-paragraph))
+(global-set-key (kbd "C-c s") (quote thing-copy-string-to-mark))

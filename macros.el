@@ -23,9 +23,14 @@
 (fset 'ric
    [tab ?# ?  ?- ?- ?- ?\[ ?  ?  ?\] ?- ?- ?- ?  ?# left left left left left left left])
 
+;; ---[ blog macros ]--- ;;
+
 ;; inserts <pre> tags with call to syntaxhighlighter (default is Java)
 (fset 'blogcode
    [?< ?p ?r ?e ?  ?c ?l ?a ?s ?s ?= ?\" ?b ?r ?u ?s ?h ?: ?  ?j ?a ?v ?a ?\" ?> return return ?< ?/ ?p ?r ?e ?> up])
+
+(fset 'blog-hdr
+   [?# ?# ?# ?# ?  ?` ?/ ?* ?  ?- ?- ?- ?\[ ?  ?  right ?- ?- ?- ?  ?* ?/ ?` left left left left left left left left left])
 
 
 ;; ---- html macros ---- ;
@@ -172,6 +177,9 @@
 (fset 'cfcom
    [tab ?# return return return ?@ ?p ?a ?r ?a ?m ?  ?\[ ?T ?y ?p ?e ?\] ?  ?t return ?@ ?r ?e ?t ?u ?r ?n ?  ?\[ ?T ?y ?p ?e ?\] ?  ?t up up up down ?  up ?  up ? ])
 
+
+(fset 'org-html-spruce
+   [up up ?\C-k right right right right right right backspace backspace backspace backspace ?d ?i ?v escape ?< ?\C-k ?\C-k ?\C-k ?\C-k ?\C-k ?\C-k ?\C-k ?\C-e left left left left left return backspace backspace backspace backspace down ?\M-d ?d ?i ?v ?. ?c ?l ?o ?j ?u ?r ?e ?\C-a down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down left left left left left left left left left return backspace backspace backspace backspace down ?\C-k right right right right backspace backspace backspace backspace ?\C-e left left left left return backspace backspace backspace backspace down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down down right right right right return backspace backspace backspace backspace down ?\C-k right right backspace backspace right ?\C-k ?d ?i ?v ?  ?c ?l ?a ?s ?s ?= ?\" ?c ?l ?o ?j ?u ?r ?e ?\C-e ?> down down ?\C-a right right right right right return up up])
 
 ;; --- macro aliases --- ;;
 (defalias 'clic 'lic)

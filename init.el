@@ -5,7 +5,7 @@
 (add-to-list 'load-path "~/.emacs.d/plugins")
 (add-to-list 'load-path "~/.emacs.d/elpa/key-chord-0.5.20080915")
 (add-to-list 'load-path "~/.emacs.d/elpa/js2-mode-20090814/")
-(add-to-list 'load-path "~/.emacs.d/elpa/solarized-theme-0.5.0/")
+;; (add-to-list 'load-path "~/.emacs.d/elpa/solarized-theme-0.5.0/")
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
 (transient-mark-mode)          ; region between mark and point is highlighted only when 'active'
@@ -16,7 +16,7 @@
 (tool-bar-mode -1)             ; turn off the toolbar
 (scroll-bar-mode -1)           ; turn off the scrollbar
 (mouse-avoidance-mode 'exile)  ; if cursor nears mouse, make the cursor move away automatically
-(global-auto-revert-mode 1)    ; auto refresh bufferss
+;; (global-auto-revert-mode 1)    ; auto refresh buffers
 (setq global-auto-revert-non-file-buffers t)  ; Also auto refresh dired
 
 ;; remove if this becomes a problem
@@ -278,17 +278,17 @@
 ;; Original idea from
 ;; http://www.opensubscriber.com/message/emacs-devel@gnu.org/10971693.html
 ;; from: http://www.emacswiki.org/emacs/CommentingCode
-(defun comment-dwim-line (&optional arg)
-  "Replacement for the comment-dwim command.
-   If no region is selected and current line is not blank and we are not at the end of the line,
-   then comment current line.
-   Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
-  (interactive "*P")
-  (comment-normalize-vars)
-  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
-    (comment-dwim arg)))
-(global-set-key "\M-;" 'comment-dwim-line)
+;; (defun comment-dwim-line (&optional arg)
+;;   "Replacement for the comment-dwim command.
+;;    If no region is selected and current line is not blank and we are not at the end of the line,
+;;    then comment current line.
+;;    Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+;;   (interactive "*P")
+;;   (comment-normalize-vars)
+;;   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+;;       (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+;;     (comment-dwim arg)))
+;; (global-set-key "\M-;" 'comment-dwim-line)
 
 ;; --------------------------------------------------------- ;;
 ;; ------------------ Color Theme Support ------------------ ;;
@@ -355,14 +355,14 @@
   (color-theme-subdued))
 
 ;; load the subdued color theme in the current frame
-(defun thsub ()
-  (interactive)
-  (theme-subdued nil))
+;; (defun thsub ()
+;;   (interactive)
+;;   (theme-subdued nil))
 
-;; load the subdued color theme in (and only in) a new frame
-(defun thsubx ()
-  (interactive)
-  (theme-subdued t))
+;; ;; load the subdued color theme in (and only in) a new frame
+;; (defun thsubx ()
+;;   (interactive)
+;;   (theme-subdued t))
 
 
 ;; --------------------------------------------------------- ;;
@@ -449,11 +449,11 @@
 
     
 ;; Haml mode
-(require 'haml-mode)
-(add-hook 'haml-mode-hook
-          '(lambda ()
-             (setq indent-tabs-mode nil)
-             (define-key haml-mode-map "\C-m" 'newline-and-indent)))
+;; (require 'haml-mode)
+;; (add-hook 'haml-mode-hook
+;;           '(lambda ()
+;;              (setq indent-tabs-mode nil)
+;;              (define-key haml-mode-map "\C-m" 'newline-and-indent)))
 
 ;; PHP support, for those sad moments I have to use it ...
 ;; workaround from usual (require 'php-mode), since there is a bug in emacs23 around this
@@ -467,7 +467,7 @@
 (add-to-list 'load-path "~/.emacs.d/plugins/coffee-mode")
 (require 'coffee-mode)
 (add-to-list 'auto-mode-alist '("\\.coffee$" . coffee-mode))
-(add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
+;; (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
 
 ;; Pig mode
 (add-to-list 'load-path "~/.emacs.d/plugins/pig-mode")
@@ -491,9 +491,9 @@
 
 ;; yasnippet
 ;; git clone git://github.com/capitaomorte/yasnippet.git
-(add-to-list 'load-path "~/.emacs.d/plugins/yasnippet")
-(require 'yasnippet)
-(yas/global-mode 1)
+;; (add-to-list 'load-path "~/.emacs.d/plugins/yasnippet")
+;; (require 'yasnippet)
+;; (yas/global-mode 1)
 
 ;; cucumber mode and support
 ;; git clone git://github.com/michaelklishin/cucumber.el.git
@@ -503,9 +503,9 @@
 ;; (add-to-list 'auto-mode-alist '("\.feature$" . feature-mode))
 
 ;; flex mode: http://jflex.de
-(add-to-list 'load-path "~/.emacs.d/plugins/jflex-mode.el")
-(require 'jflex-mode)
-(add-to-list 'auto-mode-alist '("\\.flex$" . jflex-mode))
+;; (add-to-list 'load-path "~/.emacs.d/plugins/jflex-mode.el")
+;; (require 'jflex-mode)
+;; (add-to-list 'auto-mode-alist '("\\.flex$" . jflex-mode))
 
 
 ;; mumamo (multiple major modes) support -> mostly good for html and php, so disabled by default
@@ -701,9 +701,6 @@
              ("LEFTOFF"  . (:foreground "#f333d8"))
              ))
 (setq org-log-done t)
-(org-remember-insinuate)  ; use remember.el in org-mode
-(setq org-default-notes-file (concat org-directory "/remember.org"))
-(define-key global-map "\C-cr" 'org-remember)  ; note this is C-cc in the org-mode doc
 
 (defun no-electric-indent-mode-hook ()
   (electric-indent-mode -1))
